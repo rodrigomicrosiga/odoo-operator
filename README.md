@@ -66,20 +66,18 @@ kind create cluster
 
 * **[05/06/2026] - Setup Inicial e Planejamento:**
   * Leitura e assimilação do escopo (Odoo multi-tenant).
-  * Criação do repositório `odoo-operator` e definição do padrão arquitetural da documentação.
-  * Entendimento da necessidade de dois CRDs (`OdooInstance` e `OdooDatabase`) e dos conceitos de `Referência Cruzada`, `Watches()` e `Idempotência via Kubernetes Jobs`.
+  * Criação do repositório `odoo-operator` e entendimento da necessidade de dois CRDs (`OdooInstance` e `OdooDatabase`).
 * **[05/06/2026] - O Contrato (CRDs) e Factory Pattern:**
-  * Modelagem das APIs `OdooInstance` e `OdooDatabase` no Go, adicionando marcadores de validação e formatação de colunas para o terminal (`// +kubebuilder:...`).
-  * Geração automática de manifestos YAML (`make manifests` e `make generate`).
-  * Implementação do **Factory Pattern** (`internal/factory/instance.go`). A separação de responsabilidades permitiu resolver elegantemente a injeção tripla de configuração do Odoo:
-    1. Variáveis públicas mapeadas via `ConfigMap`.
-    2. Senha do banco injetada de forma segura via `secretKeyRef`.
-    3. Arquivo de configuração mestre (`odoo.conf`) contendo o `admin_passwd` renderizado fisicamente dentro do Pod através de um `Secret Volume Mount`.
+  * Modelagem das APIs e geração automática de manifestos (`make manifests`).
+  * Implementação do **Factory Pattern** (`internal/factory`), resolvendo elegantemente a injeção tripla de configuração do Odoo.
 * **[05/06/2026] - Chain of Responsibility e Multi-Tenancy:**
-  * Implementação do `OdooInstanceReconciler` com geração idempotente de senhas (`SecretEnsurer`) e proteção de mutação em K8s resources.
-  * Teste de provisionamento bem-sucedido da infraestrutura base (`PostgreSQL + App Odoo`).
-  * Implementação do `OdooDatabaseReconciler` resolvendo o desafio da Condição de Corrida (`Race Condition`).
-  * **O "Pulo do Gato":** Implementação do evento de escuta `Watches` Cross-Kind. O controlador do Tenant monitora as mudanças de estado da Instância e acorda automaticamente quando o servidor atinge a fase `Ready`, eliminando a necessidade de `Requeue` cego e economizando recursos do cluster.
-  * Resolução da idempotência em `K8s Jobs` via Verificação de Existência e Imutabilidade.
+  * Implementação dos Ensurers para Instância e Tenant.
+  * Resolução de Condições de Corrida via `ResolveInstanceEnsurer` (O Guardião).
+  * Uso avançado de `Watches()` Cross-Kind para reatividade entre os controladores.
+* **[05/06/2026] - Troubleshooting SRE e Entrega Final:**
+  * Correção de permissões de RBAC para permitir a gestão de `Jobs` e `Ingress` pelo Operator.
+  * Resolução de conflito de entrypoint nativo do Docker (`/entrypoint.sh`) alterando a injeção de parâmetros de `Command` para `Args`.
+  * Sincronismo de estado e persistência: Identificação e resolução do "disco fantasma" (PVC), garantindo a integridade de senhas entre K8s Secrets e o PostgreSQL.
+  * **Status Final:** Servidor (OdooInstance) e Tenant (OdooDatabase) provisionados de forma autônoma, atingindo a fase `Ready` com sucesso.
 
 </details>

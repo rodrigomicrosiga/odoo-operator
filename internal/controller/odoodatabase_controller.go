@@ -22,11 +22,11 @@ type OdooDatabaseReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases/finalizers,verbs=update
-// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases/finalizers,verbs=update
+//+kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 
 func (r *OdooDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	db := &v1alpha1.OdooDatabase{}

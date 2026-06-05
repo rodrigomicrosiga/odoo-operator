@@ -27,11 +27,12 @@ func BuildInitJob(db *v1alpha1.OdooDatabase, inst *v1alpha1.OdooInstance) *batch
 	args := []string{"odoo", "-d", db.Spec.DbName, "-i", "base", "--stop-after-init"}
 
 	if db.Spec.Lang != "" {
-		args = append(args, "--language", db.Spec.Lang)
+		// A flag correta no Odoo para carregar um idioma no init é --load-language
+		args = append(args, "--load-language", db.Spec.Lang)
 	}
-	if db.Spec.DemoData {
-		args = append(args, "--without-demo=False")
-	} else {
+
+	// Odoo carrega dados de demo por padrão. Só passamos a flag se quisermos desativar.
+	if !db.Spec.DemoData {
 		args = append(args, "--without-demo=all")
 	}
 
@@ -47,9 +48,9 @@ func BuildInitJob(db *v1alpha1.OdooDatabase, inst *v1alpha1.OdooInstance) *batch
 				Spec: corev1.PodSpec{
 					RestartPolicy: corev1.RestartPolicyNever, // Jobs não devem reiniciar eternamente
 					Containers: []corev1.Container{{
-						Name:    "odoo-init",
-						Image:   inst.Spec.Odoo.Image,
-						Command: args,
+						Name:  "odoo-init",
+						Image: inst.Spec.Odoo.Image,
+						Args:  args,
 						// Reutilizamos toda a injeção de ambiente que o servidor já usa!
 						EnvFrom: []corev1.EnvFromSource{
 							{ConfigMapRef: &corev1.ConfigMapEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: inst.Name + "-cm"}}},

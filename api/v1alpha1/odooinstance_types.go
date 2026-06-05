@@ -81,8 +81,7 @@ type OdooInstance struct {
 	Status OdooInstanceStatus `json:"status,omitempty"`
 }
 
-// ... (Mantenha o restante do arquivo OdooInstanceList e init sem alterações)
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // OdooInstanceList contains a list of OdooInstance
 type OdooInstanceList struct {

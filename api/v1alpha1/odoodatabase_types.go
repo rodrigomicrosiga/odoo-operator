@@ -58,8 +58,7 @@ type OdooDatabase struct {
 	Status OdooDatabaseStatus `json:"status,omitempty"`
 }
 
-// ... (Mantenha o restante do arquivo OdooDatabaseList e init sem alterações)
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // OdooDatabaseList contains a list of OdooDatabase
 type OdooDatabaseList struct {
