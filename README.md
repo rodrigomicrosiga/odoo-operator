@@ -132,7 +132,7 @@ kubectl get secret meu-erp-secret -o jsonpath="{.data.postgres-password}" | base
 kubectl port-forward svc/meu-erp-pg 5432:5432
 ```
 
-**Passo 3: Conectar na Ferramenta SQL
+**Passo 3: Conectar na Ferramenta SQL**
 
 Crie uma conexão do tipo `PostgreSQL` na sua ferramenta favorita:
 
