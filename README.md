@@ -82,38 +82,64 @@ kind create cluster
 
 </details>
 
-## 🚀 Acessando a Aplicação Localmente
+## 🚀 Guia de Acesso Local e Debug
 
-Nosso operador gerencia o roteamento de forma dinâmica, mas durante o desenvolvimento e testes locais, você tem duas abordagens principais para acessar o Odoo:
+Nosso operador gerencia o roteamento e a segurança de forma dinâmica. Abaixo estão os manuais para interagir com a aplicação Odoo e inspecionar o Banco de Dados diretamente do seu ambiente local.
 
-### Método 1: Acesso Administrativo Direto (Bypass do Ingress)
-Ideal para debug da instância principal ou quando você precisa acessar o "Database Manager" do Odoo ignorando os filtros de tenant. Este método cria um túnel direto para o pod da aplicação, contornando o Nginx (Ingress).
+### 🌐 1. Acesso à Aplicação Web (Odoo)
 
-1. Abra um terminal e execute o comando de Port-Forward:
+**Método A: Acesso de Cliente / Tenant (Via Ingress)**
+Este método simula o acesso real, passando pelo Ingress (Nginx) que lê a URL e injeta automaticamente o filtro de isolamento do banco de dados (`X-Odoo-dbfilter`).
+* **Opção Dinâmica (nip.io):** Configure o `domain` no manifesto como `acme.127.0.0.1.nip.io` e acesse no navegador: 👉 **http://acme.127.0.0.1.nip.io**
+* **Opção Estática (Hosts):** Mapeie `127.0.0.1 acme.erp.local` no arquivo `/etc/hosts` (ou `C:\Windows\System32\drivers\etc\hosts`) e acesse: 👉 **http://acme.erp.local**
 
-   ```bash
-   kubectl port-forward svc/meu-erp-app 8069:8069
-   ```
+**Método B: Acesso Administrativo Direto (Bypass)**
+Cria um túnel direto para o pod da aplicação, ignorando as regras de Ingress. Ideal para acessar o "Database Manager" raiz do Odoo.
+```bash
+kubectl port-forward svc/meu-erp-app 8069:8069
+```
 
-   Acesse no seu navegador: 👉 http://localhost:8069
+### 🗄️ 2. Acesso Direto ao Banco de Dados (DBeaver / DataGrip)
 
-   ⚠️ **Nota de Arquitetura:** Como este método ignora o Ingress, o cabeçalho `X-Odoo-dbfilter` não é injetado. Se houver múltiplos bancos de dados (tenants) criados na mesma instância, o Odoo exibirá a tela padrão de seleção de banco de dados.
+Os bancos de dados ficam isolados no cluster por segurança. Para rodar consultas SQL nativas no tenant gerado, utilize a técnica de `port-forwarding`.
 
-2. Acesso de Cliente / Tenant (Testando o Multi-Tenancy)
+**Passo 1: Listar as Secrets**
 
-    Este é o teste do cenário real. Ao acessar pelo domínio configurado no `OdooDatabase`, você passa pelo `Ingress (Nginx)`, que lê a URL e injeta o cabeçalho de filtro isolando a visão do usuário apenas para o seu próprio banco de dados (neste caso, o `acme`).
+```bash
+kubectl get secrets
+```
 
-    Como estamos em um ambiente local e o domínio `acme.erp.local` não existe na internet, podemos testar o tráfego do Ingress da seguinte forma:
+Provavelmente será algo como `meu-erp-db-secret` ou similar, dependendo de como você nomeou na `Factory`.
 
-    ⚠️ **DNS Dinâmico:** Altere o campo domain no seu manifesto `odoodatabase.yaml` para usar o serviço de resolução de IP curinga `nip.io`:
+**Passo 1: Extrair a Senha do K8s Secret**
+O Operator gera senhas aleatórias na criação da Instância. Descriptografe a senha com o comando:
 
-    ```YAML
-    spec:
-      domain: acme.127.0.0.1.nip.io
-    ```
+- **Linux/Mac/WSL**
 
-    Aplique o manifesto.
+```bash
+kubectl get secret meu-erp-secret -o jsonpath="{.data.postgres-password}" | base64 --decode
+```
 
-    Acesse no seu navegador: 👉 http://acme.127.0.0.1.nip.io
+- **Windows (PowerShell)**
+
+```powershell
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((kubectl get secret meu-erp-secret -o jsonpath='{.data.postgres-password}')))
+```
+
+**Passo 2: Abrir o Túnel de Rede**
+
+```bash
+kubectl port-forward svc/meu-erp-pg 5432:5432
+```
+
+**Passo 3: Conectar na Ferramenta SQL
+
+Crie uma conexão do tipo `PostgreSQL` na sua ferramenta favorita:
+
+- **Host:** `localhost`
+- **Porta:** `5432`
+- **Database:** `acme` (para o tenant) ou `postgres` (master)
+- **Username:** `odoo`
+- **Password:** (A senha descriptografa no Passo 1)
 
 
