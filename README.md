@@ -59,8 +59,6 @@ kind create cluster
 
 ⚠️ Problemas Conhecidos e Soluções (Troubleshooting)\
 
-(Espaço reservado para documentar os desafios de infraestrutura e código encontrados durante a jornada).
-
 <details open>
 <summary>📖 <strong>Diário de Desenvolvimento (Clique para expandir)</strong></summary>
 
@@ -111,7 +109,7 @@ kubectl get secrets
 
 Provavelmente será algo como `meu-erp-db-secret` ou similar, dependendo de como você nomeou na `Factory`.
 
-**Passo 1: Extrair a Senha do K8s Secret**
+**Passo 1: Extrair a Senha do K8s Secret**\
 O Operator gera senhas aleatórias na criação da Instância. Descriptografe a senha com o comando:
 
 - **Linux/Mac/WSL**
