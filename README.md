@@ -81,3 +81,39 @@ kind create cluster
   * **Status Final:** Servidor (OdooInstance) e Tenant (OdooDatabase) provisionados de forma autônoma, atingindo a fase `Ready` com sucesso.
 
 </details>
+
+## 🚀 Acessando a Aplicação Localmente
+
+Nosso operador gerencia o roteamento de forma dinâmica, mas durante o desenvolvimento e testes locais, você tem duas abordagens principais para acessar o Odoo:
+
+### Método 1: Acesso Administrativo Direto (Bypass do Ingress)
+Ideal para debug da instância principal ou quando você precisa acessar o "Database Manager" do Odoo ignorando os filtros de tenant. Este método cria um túnel direto para o pod da aplicação, contornando o Nginx (Ingress).
+
+1. Abra um terminal e execute o comando de Port-Forward:
+
+   ```bash
+   kubectl port-forward svc/meu-erp-app 8069:8069
+   ```
+
+   Acesse no seu navegador: 👉 http://localhost:8069
+
+   ⚠️ **Nota de Arquitetura:** Como este método ignora o Ingress, o cabeçalho `X-Odoo-dbfilter` não é injetado. Se houver múltiplos bancos de dados (tenants) criados na mesma instância, o Odoo exibirá a tela padrão de seleção de banco de dados.
+
+2. Acesso de Cliente / Tenant (Testando o Multi-Tenancy)
+
+    Este é o teste do cenário real. Ao acessar pelo domínio configurado no `OdooDatabase`, você passa pelo `Ingress (Nginx)`, que lê a URL e injeta o cabeçalho de filtro isolando a visão do usuário apenas para o seu próprio banco de dados (neste caso, o `acme`).
+
+    Como estamos em um ambiente local e o domínio `acme.erp.local` não existe na internet, podemos testar o tráfego do Ingress da seguinte forma:
+
+    ⚠️ **DNS Dinâmico:** Altere o campo domain no seu manifesto `odoodatabase.yaml` para usar o serviço de resolução de IP curinga `nip.io`:
+
+    ```YAML
+    spec:
+      domain: acme.127.0.0.1.nip.io
+    ```
+
+    Aplique o manifesto.
+
+    Acesse no seu navegador: 👉 http://acme.127.0.0.1.nip.io
+
+
