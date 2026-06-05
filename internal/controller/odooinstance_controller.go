@@ -33,11 +33,12 @@ func (r *OdooInstanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	// Aciona a Chain of Responsibility
 	chain := r.buildChain()
-	return chain.Run(ctx, inst)
+	return chain.Reconcile(ctx, inst) // Mudamos de Run para Reconcile
 }
 
-func (r *OdooInstanceReconciler) buildChain() reconciler.Chain[*v1alpha1.OdooInstance] {
-	return reconciler.NewChain(
+// Mudamos o tipo de retorno para reconciler.Handler e a chamada para reconciler.Chain
+func (r *OdooInstanceReconciler) buildChain() reconciler.Handler[*v1alpha1.OdooInstance] {
+	return reconciler.Chain(
 		&odooinstance.SecretEnsurer{Client: r.Client, Scheme: r.Scheme},
 		&odooinstance.DatabaseStatefulSetEnsurer{Client: r.Client, Scheme: r.Scheme},
 		&odooinstance.DatabaseServiceEnsurer{Client: r.Client, Scheme: r.Scheme},

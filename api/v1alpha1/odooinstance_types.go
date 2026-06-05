@@ -82,3 +82,15 @@ type OdooInstance struct {
 }
 
 // ... (Mantenha o restante do arquivo OdooInstanceList e init sem alterações)
+//+kubebuilder:object:root=true
+
+// OdooInstanceList contains a list of OdooInstance
+type OdooInstanceList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []OdooInstance `json:"items"`
+}
+
+func init() {
+	SchemeBuilder.Register(&OdooInstance{}, &OdooInstanceList{})
+}

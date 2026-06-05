@@ -59,3 +59,15 @@ type OdooDatabase struct {
 }
 
 // ... (Mantenha o restante do arquivo OdooDatabaseList e init sem alterações)
+//+kubebuilder:object:root=true
+
+// OdooDatabaseList contains a list of OdooDatabase
+type OdooDatabaseList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []OdooDatabase `json:"items"`
+}
+
+func init() {
+	SchemeBuilder.Register(&OdooDatabase{}, &OdooDatabaseList{})
+}
