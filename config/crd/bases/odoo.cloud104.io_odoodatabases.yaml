@@ -14,7 +14,20 @@ spec:
     singular: odoodatabase
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.instanceRef.name
+      name: Instance
+      type: string
+    - jsonPath: .spec.dbName
+      name: DB Name
+      type: string
+    - jsonPath: .spec.domain
+      name: Domain
+      type: string
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: OdooDatabase is the Schema for the odoodatabases API
@@ -37,27 +50,36 @@ spec:
           metadata:
             type: object
           spec:
-            description: spec defines the desired state of OdooDatabase
+            description: OdooDatabaseSpec define o estado desejado do banco lógico
             properties:
-              foo:
-                description: foo is an example field of OdooDatabase. Edit odoodatabase_types.go
-                  to remove/update
+              dbName:
+                description: DbName é o nome do banco de dados no PostgreSQL
                 type: string
+              demoData:
+                type: boolean
+              domain:
+                description: Domain é a URL exclusiva deste tenant
+                type: string
+              instanceRef:
+                description: InstanceReference aponta para o OdooInstance pai
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
+              lang:
+                type: string
+            required:
+            - dbName
+            - domain
+            - instanceRef
             type: object
           status:
-            description: status defines the observed state of OdooDatabase
+            description: OdooDatabaseStatus define o estado observado da criação do
+              banco
             properties:
               conditions:
-                description: |-
-                  conditions represent the current state of the OdooDatabase resource.
-                  Each condition has a unique type and reflects the status of a specific aspect of the resource.
-
-                  Standard condition types include:
-                  - "Available": the resource is fully functional
-                  - "Progressing": the resource is being created or updated
-                  - "Degraded": the resource failed to reach or maintain its desired state
-
-                  The status of each condition is one of True, False, or Unknown.
                 items:
                   description: Condition contains details for one aspect of the current
                     state of this API Resource.
@@ -113,12 +135,12 @@ spec:
                   - type
                   type: object
                 type: array
-                x-kubernetes-list-map-keys:
-                - type
-                x-kubernetes-list-type: map
+              observedGeneration:
+                format: int64
+                type: integer
+              phase:
+                type: string
             type: object
-        required:
-        - spec
         type: object
     served: true
     storage: true
