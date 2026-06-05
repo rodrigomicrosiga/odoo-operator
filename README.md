@@ -61,7 +61,19 @@ kind create cluster
 
 (Espaço reservado para documentar os desafios de infraestrutura e código encontrados durante a jornada).
 
-* [05/06/2026] - Setup Inicial e Planejamento:
-  * Leitura e assimilação do escopo (`Odoo multi-tenant`).
+<details open>
+<summary>📖 <strong>Diário de Desenvolvimento (Clique para expandir)</strong></summary>
+
+* **[05/06/2026] - Setup Inicial e Planejamento:**
+  * Leitura e assimilação do escopo (Odoo multi-tenant).
   * Criação do repositório `odoo-operator` e definição do padrão arquitetural da documentação.
   * Entendimento da necessidade de dois CRDs (`OdooInstance` e `OdooDatabase`) e dos conceitos de `Referência Cruzada`, `Watches()` e `Idempotência via Kubernetes Jobs`.
+* **[05/06/2026] - O Contrato (CRDs) e Factory Pattern:**
+  * Modelagem das APIs `OdooInstance` e `OdooDatabase` no Go, adicionando marcadores de validação e formatação de colunas para o terminal (`// +kubebuilder:...`).
+  * Geração automática de manifestos YAML (`make manifests` e `make generate`).
+  * Implementação do **Factory Pattern** (`internal/factory/instance.go`). A separação de responsabilidades permitiu resolver elegantemente a injeção tripla de configuração do Odoo:
+    1. Variáveis públicas mapeadas via `ConfigMap`.
+    2. Senha do banco injetada de forma segura via `secretKeyRef`.
+    3. Arquivo de configuração mestre (`odoo.conf`) contendo o `admin_passwd` renderizado fisicamente dentro do Pod através de um `Secret Volume Mount`.
+
+</details>
