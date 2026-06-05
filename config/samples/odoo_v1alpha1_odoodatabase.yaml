@@ -2,8 +2,13 @@ apiVersion: odoo.cloud104.io/v1alpha1
 kind: OdooDatabase
 metadata:
   labels:
-    app.kubernetes.io/name: odoo-operator
+    app.kubernetes.io/name: odoodatabase
     app.kubernetes.io/managed-by: kustomize
-  name: odoodatabase-sample
+  name: cliente-acme
 spec:
-  # TODO(user): Add fields here
+  instanceRef:
+    name: meu-erp
+  dbName: acme
+  domain: acme.erp.local
+  lang: pt_BR
+  demoData: true

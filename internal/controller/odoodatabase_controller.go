@@ -1,33 +1,22 @@
-/*
-Copyright 2026.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package controller
 
 import (
 	"context"
 
+	batchv1 "k8s.io/api/batch/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	odoov1alpha1 "github.com/rodrigomicrosiga/odoo-operator/api/v1alpha1"
+	"github.com/cloud104/reconciler/v2"
+	v1alpha1 "github.com/rodrigomicrosiga/odoo-operator/api/v1alpha1"
+	"github.com/rodrigomicrosiga/odoo-operator/internal/controller/odoodatabase"
 )
 
-// OdooDatabaseReconciler reconciles a OdooDatabase object
 type OdooDatabaseReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -36,28 +25,59 @@ type OdooDatabaseReconciler struct {
 // +kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=odoo.cloud104.io,resources=odoodatabases/finalizers,verbs=update
+// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the OdooDatabase object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.23.3/pkg/reconcile
 func (r *OdooDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
+	db := &v1alpha1.OdooDatabase{}
+	if err := r.Get(ctx, req.NamespacedName, db); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-	// TODO(user): your logic here
-
-	return ctrl.Result{}, nil
+	chain := r.buildChain()
+	return chain.Reconcile(ctx, db)
 }
 
-// SetupWithManager sets up the controller with the Manager.
+func (r *OdooDatabaseReconciler) buildChain() reconciler.Handler[*v1alpha1.OdooDatabase] {
+	return reconciler.Chain(
+		&odoodatabase.ResolveInstanceEnsurer{Client: r.Client},
+		&odoodatabase.DatabaseInitJobEnsurer{Client: r.Client, Scheme: r.Scheme},
+		&odoodatabase.IngressEnsurer{Client: r.Client, Scheme: r.Scheme},
+		&odoodatabase.StatusEnsurer{Client: r.Client},
+	)
+}
+
 func (r *OdooDatabaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&odoov1alpha1.OdooDatabase{}).
-		Named("odoodatabase").
+		For(&v1alpha1.OdooDatabase{}).
+		Owns(&batchv1.Job{}).
+		Owns(&networkingv1.Ingress{}).
+		// WATCHES CROSS-KIND: Escuta as mudanças no Servidor e aciona os Tenants dependentes
+		Watches(
+			&v1alpha1.OdooInstance{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, o client.Object) []reconcile.Request {
+				inst := o.(*v1alpha1.OdooInstance)
+				var dbList v1alpha1.OdooDatabaseList
+
+				// Busca todos os Tenants no mesmo namespace...
+				if err := r.List(ctx, &dbList, client.InNamespace(inst.Namespace)); err != nil {
+					return nil
+				}
+
+				// ... e acorda apenas aqueles que apontam para o Servidor que mudou de status!
+				var reqs []reconcile.Request
+				for _, db := range dbList.Items {
+					if db.Spec.InstanceRef.Name == inst.Name {
+						reqs = append(reqs, reconcile.Request{
+							NamespacedName: types.NamespacedName{
+								Name:      db.Name,
+								Namespace: db.Namespace,
+							},
+						})
+					}
+				}
+				return reqs
+			}),
+		).
 		Complete(r)
 }

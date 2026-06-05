@@ -75,5 +75,11 @@ kind create cluster
     1. Variáveis públicas mapeadas via `ConfigMap`.
     2. Senha do banco injetada de forma segura via `secretKeyRef`.
     3. Arquivo de configuração mestre (`odoo.conf`) contendo o `admin_passwd` renderizado fisicamente dentro do Pod através de um `Secret Volume Mount`.
+* **[05/06/2026] - Chain of Responsibility e Multi-Tenancy:**
+  * Implementação do `OdooInstanceReconciler` com geração idempotente de senhas (`SecretEnsurer`) e proteção de mutação em K8s resources.
+  * Teste de provisionamento bem-sucedido da infraestrutura base (`PostgreSQL + App Odoo`).
+  * Implementação do `OdooDatabaseReconciler` resolvendo o desafio da Condição de Corrida (`Race Condition`).
+  * **O "Pulo do Gato":** Implementação do evento de escuta `Watches` Cross-Kind. O controlador do Tenant monitora as mudanças de estado da Instância e acorda automaticamente quando o servidor atinge a fase `Ready`, eliminando a necessidade de `Requeue` cego e economizando recursos do cluster.
+  * Resolução da idempotência em `K8s Jobs` via Verificação de Existência e Imutabilidade.
 
 </details>
