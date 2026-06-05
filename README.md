@@ -46,9 +46,16 @@ Kind (para criação do cluster local)
 
 kubebuilder v4
 
-🚀 Como Executar e Simular (Em Breve)\
+Tilt
 
-(Os comandos de implantação, port-forward e simulação de criação/destruição serão documentados aqui conforme o avanço do projeto).
+## 🚀 Como Executar e Simular (Desenvolvimento Local)
+
+Para garantir um fluxo de desenvolvimento rápido e contínuo (Live Reload), este projeto faz uso do **Tilt**.
+
+**1. Suba o cluster local:**
+```bash
+kind create cluster
+```
 
 ⚠️ Problemas Conhecidos e Soluções (Troubleshooting)\
 

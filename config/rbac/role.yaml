@@ -1,11 +1,35 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app.kubernetes.io/name: odoo-operator
-    app.kubernetes.io/managed-by: kustomize
   name: manager-role
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - odoo.cloud104.io
+  resources:
+  - odoodatabases
+  - odooinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - odoo.cloud104.io
+  resources:
+  - odoodatabases/finalizers
+  - odooinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - odoo.cloud104.io
+  resources:
+  - odoodatabases/status
+  - odooinstances/status
+  verbs:
+  - get
+  - patch
+  - update
