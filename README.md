@@ -140,4 +140,19 @@ Crie uma conexão do tipo `PostgreSQL` na sua ferramenta favorita:
 - **Username:** `odoo`
 - **Password:** (A senha descriptografa no Passo 1)
 
+### 🌐 3. Credenciais de Acesso ao Sistema (Tenant ACME)
 
+- **E-mail (Usuário):** `admin`
+- **Senha:** `admin`
+
+### 🗄️ 4. Bônus: A Senha Master (Gerenciados de Banco de Dados)
+
+Vale lembrar de um detalhe estrutural importante que vimos quando foi inspecionado o `Secret` do Kubernetes.\
+Lá dentro, além da senha do PostgreSQL (`postgres-password`), o `Operator` gerou o arquivo `odoo.conf` com um parâmetro chamado `admin_passwd`. Ao decodificar essa linha é possível obter a `Senha Master` da instância.
+
+**A Diferença entre elas:**
+
+- `admin` / `admin`: Acesso à interface do ERP para emitit notas, cadastrar clientes, instalar módulos, etc (Específico do banco `acme`).
+
+- **Senha Master:** Acesso a tela de `bypass`\
+(`http://localhost:8069/web/database/manager`) para criar, deletar, fazer backup ou restaurar bancos de dados interios por fora do `Operator` (Específico do servidor `meu-erp`).
