@@ -90,16 +90,21 @@ Nosso operador gerencia o roteamento e a segurança de forma dinâmica. Abaixo e
 
 ### 🌐 1. Acesso à Aplicação Web (Odoo)
 
-**Método A: Acesso de Cliente / Tenant (Via Ingress)**
-Este método simula o acesso real, passando pelo Ingress (Nginx) que lê a URL e injeta automaticamente o filtro de isolamento do banco de dados (`X-Odoo-dbfilter`).
-* **Opção Dinâmica (nip.io):** Configure o `domain` no manifesto como `acme.127.0.0.1.nip.io` e acesse no navegador: 👉 **http://acme.127.0.0.1.nip.io**
-* **Opção Estática (Hosts):** Mapeie `127.0.0.1 acme.erp.local` no arquivo `/etc/hosts` (ou `C:\Windows\System32\drivers\etc\hosts`) e acesse: 👉 **http://acme.erp.local**
+Para validar e interagir com o ERP Odoo rodando no cluster local, você pode utilizar uma das três abordagens abaixo, dependendo da necessidade de exposição:
 
-**Método B: Acesso Administrativo Direto (Bypass)**
-Cria um túnel direto para o pod da aplicação, ignorando as regras de Ingress. Ideal para acessar o "Database Manager" raiz do Odoo.
-```bash
-kubectl port-forward svc/meu-erp-app 8069:8069
-```
+* **Método A (Acesso Direto via Port-Forward):** Ideal para desenvolvimento isolado. Cria uma ponte direta entre o pod e a sua máquina.
+  * **Comando:** `kubectl port-forward svc/meu-erp 8069:8069`
+  * **Acesso:** `http://localhost:8069`
+
+* **Método B (Roteamento via Ingress + Hosts):** Ideal para simular um ambiente corporativo. Este método simula o acesso real, passando pelo Ingress (Nginx) que lê a URL e injeta automaticamente o filtro de isolamento do banco de dados (`X-Odoo-dbfilter`). Requer a configuração do Ingress Controller e a edição do arquivo `/etc/hosts` (ou `C:\Windows\System32\drivers\etc\hosts`) apontando `127.0.0.1 odoo.totvs.local`.
+  * **Acesso:** `http://odoo.totvs.local`
+
+* **Método C (Túnel Seguro via Ngrok):** Ideal para homologação externa e validação com especialistas. Expõe o serviço local para a internet com um certificado SSL/TLS válido, sem necessidade de configuração de VPN ou edição de arquivos locais por parte do cliente.
+  * **Como usar:** Com a porta 8069 exposta localmente (via Método A), execute no terminal:
+    ```bash
+    ngrok http 8069
+    ```
+  * **Acesso:** Copie a URL pública gerada no terminal (ex: `https://<hash>.ngrok-free.app`)
 
 ### 🗄️ 2. Acesso Direto ao Banco de Dados (DBeaver / DataGrip)
 
