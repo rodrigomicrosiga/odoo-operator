@@ -70,6 +70,10 @@ func BuildPostgresStatefulSet(inst *v1alpha1.OdooInstance) *appsv1.StatefulSet {
 									},
 								},
 							},
+							{
+								Name:  "PGDATA",
+								Value: "/var/lib/postgresql/data/pgdata",
+							},
 						},
 						Ports: []corev1.ContainerPort{{ContainerPort: 5432, Name: "postgres"}},
 						VolumeMounts: []corev1.VolumeMount{

@@ -1,0 +1,14 @@
+apiVersion: odoo.cloud104.io/v1alpha1
+kind: OdooDatabase
+metadata:
+  labels:
+    app.kubernetes.io/name: odoodatabase
+    app.kubernetes.io/managed-by: kustomize
+  name: cliente-beta
+spec:
+  instanceRef:
+    name: meu-erp
+  dbName: cliente-beta
+  domain: cliente-beta.erp.local
+  lang: pt_BR
+  demoData: true
