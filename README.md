@@ -77,6 +77,10 @@ kind create cluster
   * Resolução de conflito de entrypoint nativo do Docker (`/entrypoint.sh`) alterando a injeção de parâmetros de `Command` para `Args`.
   * Sincronismo de estado e persistência: Identificação e resolução do "disco fantasma" (PVC), garantindo a integridade de senhas entre K8s Secrets e o PostgreSQL.
   * **Status Final:** Servidor (OdooInstance) e Tenant (OdooDatabase) provisionados de forma autônoma, atingindo a fase `Ready` com sucesso.
+* **[09/06/2026] - Roteamento Profissional e Homologação do ERP:**
+  * Implementei o NGINX Ingress Controller no cluster local Kind para centralizar as regras de entrada de tráfego.
+  * Configurei o manifesto de `Ingress` mapeando o host corporativo virtualizado para o serviço ativo do Odoo.
+  * Validei com sucesso o ciclo completo de requisições eliminando resoluções genéricas (wildcards de internet), estabelecendo um padrão de resolução estática para homologação.
 
 </details>
 
