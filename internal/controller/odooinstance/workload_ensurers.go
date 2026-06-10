@@ -6,6 +6,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr" // Import adicionado para o ponteiro do FSGroup
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -132,6 +133,14 @@ type OdooDeploymentEnsurer struct {
 
 func (e *OdooDeploymentEnsurer) Reconcile(ctx context.Context, inst *v1alpha1.OdooInstance) (ctrl.Result, error) {
 	desired := factory.BuildOdooDeployment(inst)
+
+	// INJEÇÃO DA CORREÇÃO DE SEGURANÇA (HOTFIX SRE)
+	// Garante que o usuário Odoo (101) terá permissão de escrita no volume persistente
+	if desired.Spec.Template.Spec.SecurityContext == nil {
+		desired.Spec.Template.Spec.SecurityContext = &corev1.PodSecurityContext{}
+	}
+	desired.Spec.Template.Spec.SecurityContext.FSGroup = ptr.To[int64](101)
+
 	obj := &appsv1.Deployment{ObjectMeta: desired.ObjectMeta}
 
 	_, err := controllerutil.CreateOrUpdate(ctx, e.Client, obj, func() error {

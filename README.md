@@ -81,6 +81,11 @@ kind create cluster
   * Implementei o NGINX Ingress Controller no cluster local Kind para centralizar as regras de entrada de tráfego.
   * Configurei o manifesto de `Ingress` mapeando o host corporativo virtualizado para o serviço ativo do Odoo.
   * Validei com sucesso o ciclo completo de requisições eliminando resoluções genéricas (wildcards de internet), estabelecendo um padrão de resolução estática para homologação.
+* **[10/06/2026] - Homologação Corporativa e Práticas de SRE**
+  * **Roteamento Seguro com Ingress e Cert-Manager:** Implementação de regras de Ingress apontando para o domínio corporativo (`*.francis.tcloud-devops.cloudtotvs.com.br`). Integração nativa com o `cert-manager` para provisionamento dinâmico de certificados SSL/TLS, garantindo tráfego 100% HTTPS (Let's Encrypt).
+  * **Gestão de Permissões de Volume (FSGroup):** Diagnóstico e resolução do clássico erro de permissão em Persistent Volumes em nuvem (`PermissionError [Errno 13]`). O volume montado como `root` impedia a gravação da sessão pelo usuário restrito da aplicação.
+  * **Evolução do Operador (Release v1.0.4):** Atualização do orquestrador `OdooDeploymentEnsurer`. Injeção nativa do `SecurityContext` (`FSGroup: 101`) no manifesto de Deployment. Toda nova instância provisionada pelo Operator agora nasce inerentemente segura e com as permissões de acesso a disco já resolvidas.
+  * **Validação Multi-tenant:** Comprovação da resiliência do Operator no gerenciamento dinâmico de múltiplos bancos de dados PostgreSQL para instâncias isoladas (Tenants) através da leitura de Custom Resources.
 
 </details>
 
