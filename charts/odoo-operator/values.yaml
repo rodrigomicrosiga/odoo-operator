@@ -1,0 +1,21 @@
+replicaCount: 1
+
+image:
+  repository: rodrigomicrosiga/odoo-operator
+  tag: "v1.0.4"
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+securityContext:
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+
+kubeRGBACProxy:
+  image: gcr.io/kubebuilder/kube-rbac-proxy:v0.15.0

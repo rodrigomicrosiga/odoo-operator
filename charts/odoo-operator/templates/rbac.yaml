@@ -1,0 +1,81 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "odoo-operator.fullname" . }}-manager-role
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+rules:
+# 1. Permissões para o nosso Custom Resource (OdooInstance)
+- apiGroups:
+  - odoo.cloud104.io
+  resources:
+  - odooinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - odoo.cloud104.io
+  resources:
+  - odooinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - odoo.cloud104.io
+  resources:
+  - odooinstances/finalizers
+  verbs:
+  - update
+
+# 2. Permissões para os Workloads do Kubernetes
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+# 3. Permissões para Rede e Armazenamento (Core)
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - persistentvolumeclaims
+  - secrets
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "odoo-operator.fullname" . }}-manager-rolebinding
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "odoo-operator.fullname" . }}-manager-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "odoo-operator.fullname" . }}-controller-manager
+  namespace: {{ .Release.Namespace }}

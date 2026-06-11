@@ -170,3 +170,21 @@ Lá dentro, além da senha do PostgreSQL (`postgres-password`), o `Operator` ger
 
 - **Senha Master:** Acesso a tela de `bypass`\
 (`http://localhost:8069/web/database/manager`) para criar, deletar, fazer backup ou restaurar bancos de dados interios por fora do `Operator` (Específico do servidor `meu-erp`).
+
+## 📦 Instalação via Helm Chart (Recomendado para Produção)
+
+O `odoo-operator` foi empacotado utilizando o Helm, garantindo uma implantação parametrizável, segura e rastreável em ambientes Cloud Native. O Chart gerencia nativamente a criação da ServiceAccount, RBAC (ClusterRoles e Bindings) e o Deployment do controlador.
+
+### Estrutura do Pacote
+Os manifestos do Helm estão localizados na pasta `charts/odoo-operator/`:
+- `values.yaml`: Centraliza todas as variáveis (imagem, tag, resources, securityContext).
+- `crds/`: Contém as definições do Custom Resource (`OdooInstance`). Ficam isoladas para garantir segurança em upgrades (evitando deleções acidentais de tenants).
+- `templates/`: Manifestos parametrizados do controlador e permissões.
+
+### Como Instalar
+
+**1. Validação do Chart (Lint & Dry-run)**
+Antes de aplicar no cluster, você pode validar a sintaxe e visualizar a renderização final dos manifestos:
+```bash
+helm lint charts/odoo-operator
+helm template odoo-operator charts/odoo-operator
