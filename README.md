@@ -188,3 +188,41 @@ Antes de aplicar no cluster, você pode validar a sintaxe e visualizar a renderi
 ```bash
 helm lint charts/odoo-operator
 helm template odoo-operator charts/odoo-operator
+```
+
+## 🌟 Arquitetura e Roteamento (Padrão Enterprise)
+
+Este operador adota padrões avançados de roteamento em nuvem, descartando Ingresses tradicionais em favor de uma integração fluida com malhas de rede externas:
+
+* **Integração com ExternalDNS:** O operador cria dinamicamente serviços do tipo `ExternalName` anotados para propagação automática em zonas de DNS na nuvem.
+* **TLS Nativo via Cert-Manager:** Geração automática de requisições ACME (`Certificates`) vinculadas ao `ClusterIssuer`, garantindo criptografia Let's Encrypt/CA Interna com zero intervenção manual.
+* **K9s UX Ready:** Custom Columns configuradas nativamente nos CRDs (`+kubebuilder:printcolumn`). Visualize as URLs de acesso e a saúde das instâncias (`Phase`) diretamente nas listagens do Kubernetes.
+
+## 🚀 Como usar
+
+A definição do `OdooInstance` foi projetada para ser declarativa e enxuta. O campo `domain` é obrigatório e atua como o gatilho para a geração de toda a infraestrutura de rede e criptografia.
+
+```yaml
+apiVersion: odoo.cloud104.io/v1alpha1
+kind: OdooInstance
+metadata:
+  name: meu-erp
+  namespace: default
+spec:
+  domain: meu-erp.empresa.com.br
+  odoo:
+    image: odoo:17.0
+    replicas: 1
+    storageSize: 5Gi
+  database:
+    image: postgres:16
+    user: odoo
+    storageSize: 10Gi
+```
+## 🛠️ Instalação via Helm
+
+O deployment do operador é gerenciado via Helm Chart, garantindo a configuração correta do RBAC (incluindo permissões de cert-manager e Leader Election).
+
+```bash
+helm upgrade --install odoo-operator ./charts/odoo-operator -n odoo-operator-system --create-namespace
+```

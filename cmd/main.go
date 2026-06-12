@@ -35,6 +35,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	cmv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	odoov1alpha1 "github.com/rodrigomicrosiga/odoo-operator/api/v1alpha1"
 	"github.com/rodrigomicrosiga/odoo-operator/internal/controller"
 	// +kubebuilder:scaffold:imports
@@ -49,6 +50,9 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(odoov1alpha1.AddToScheme(scheme))
+
+	// Registrando os recursos do Cert-Manager no Scheme do Operador
+	utilruntime.Must(cmv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 

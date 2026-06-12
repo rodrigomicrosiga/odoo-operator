@@ -3,4 +3,4 @@ name: odoo-operator
 description: A Helm chart for deploying the Odoo Kubernetes Operator
 type: application
 version: 0.1.0
-appVersion: "v1.0.4" # Alinhado com a nossa última release estável
+appVersion: "v1.0.5" # Alinhado com a nossa última release estável

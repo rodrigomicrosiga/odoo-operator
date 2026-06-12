@@ -48,7 +48,7 @@ func (e *StatusEnsurer) Reconcile(ctx context.Context, inst *v1alpha1.OdooInstan
 	// 4. Atualiza a Phase e a URL
 	if isFullyReady {
 		inst.Status.Phase = "Ready"
-		inst.Status.URL = "http://" + inst.Spec.Domain
+		inst.Status.URL = "https://" + inst.Spec.Domain
 	} else {
 		inst.Status.Phase = "Provisioning"
 	}

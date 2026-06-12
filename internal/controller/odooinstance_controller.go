@@ -9,6 +9,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	cmv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/cloud104/reconciler/v2"
 	v1alpha1 "github.com/rodrigomicrosiga/odoo-operator/api/v1alpha1"
 	"github.com/rodrigomicrosiga/odoo-operator/internal/controller/odooinstance"
@@ -24,6 +25,7 @@ type OdooInstanceReconciler struct {
 // +kubebuilder:rbac:groups=odoo.cloud104.io,resources=odooinstances/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments;statefulsets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=secrets;services;configmaps;persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;watch;create;update;patch;delete
 
 func (r *OdooInstanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	inst := &v1alpha1.OdooInstance{}
@@ -46,6 +48,8 @@ func (r *OdooInstanceReconciler) buildChain() reconciler.Handler[*v1alpha1.OdooI
 		&odooinstance.OdooFilestorePVCEnsurer{Client: r.Client, Scheme: r.Scheme},
 		&odooinstance.OdooDeploymentEnsurer{Client: r.Client, Scheme: r.Scheme},
 		&odooinstance.OdooServiceEnsurer{Client: r.Client, Scheme: r.Scheme},
+		&odooinstance.OdooDNSEnsurer{Client: r.Client, Scheme: r.Scheme}, // <-- NOVO (VERIFIQUE SE ESTÁ AQUI)
+		&odooinstance.OdooTLSEnsurer{Client: r.Client, Scheme: r.Scheme}, // <-- NOVO (VERIFIQUE SE ESTÁ AQUI)
 		&odooinstance.StatusEnsurer{Client: r.Client},
 	)
 }
@@ -59,5 +63,6 @@ func (r *OdooInstanceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.PersistentVolumeClaim{}).
 		Owns(&appsv1.Deployment{}).
+		Owns(&cmv1.Certificate{}). // AVISA O GERENCIADOR SOBRE O CERTIFICADO
 		Complete(r)
 }

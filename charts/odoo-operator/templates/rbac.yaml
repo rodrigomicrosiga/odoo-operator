@@ -64,6 +64,85 @@ rules:
   - patch
   - update
   - watch
+
+# 4. Permissoes para o Cert-Manager
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - certificates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+# 5. Permissoes para Leader Election e Eventos do Kubernetes
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+
+# 6. Permissoes para o OdooDatabase (CRD secundario)
+- apiGroups:
+  - odoo.cloud104.io
+  resources:
+  - odoodatabases
+  - odoodatabases/status
+  - odoodatabases/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+# 7. Permissoes para os Workloads do Banco de Dados (Jobs)
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+# 8. Permissoes para Rede antiga (Ingress)
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
